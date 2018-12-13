@@ -23,6 +23,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
 
@@ -33,14 +35,14 @@ import org.apache.http.impl.cookie.BasicClientCookie;
 public class CookieConverter {
 
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(
-            "EEE, dd MMM yyyy HH:mm:ss zzz");
+            "EEE, dd MMM yyyy HH:mm:ss zzz", Locale.ENGLISH);
 
     /**
      * Get a list of cookies based on the cookies string taken from response
      * header and the target url.
      * 
-     * @param cookiesString
-     *            the value of the http header for "Cookie" in the http
+     * @param cookiesStrings
+     *            the values of the http header for "Cookie" in the http
      *            response.
      * @param targetURL
      *            the url for which we wish to pass the cookies in the request.
