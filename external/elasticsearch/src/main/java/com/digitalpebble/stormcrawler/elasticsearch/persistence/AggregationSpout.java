@@ -180,17 +180,17 @@ public class AggregationSpout extends AbstractSpout implements
     @Override
     public void onFailure(Exception arg0) {
         LOG.error("Exception with ES query", arg0);
-        isInQuery.set(false);
+        markQueryReceivedNow();
     }
 
     @Override
     public void onResponse(SearchResponse response) {
-        long timeTaken = System.currentTimeMillis() - timeLastQuery;
+        long timeTaken = System.currentTimeMillis() - getTimeLastQuerySent();
 
         Aggregations aggregs = response.getAggregations();
 
         if (aggregs == null) {
-            isInQuery.set(false);
+            markQueryReceivedNow();
             return;
         }
 
@@ -245,14 +245,19 @@ public class AggregationSpout extends AbstractSpout implements
                         }
                     }
 
-                    // is already being processed - skip it!
-                    if (beingProcessed.containsKey(url)) {
+                    // is already being processed or in buffer - skip it!
+                    if (beingProcessed.containsKey(url)
+                            || in_buffer.contains(url)) {
+                        LOG.debug("{} -> already processed or in buffer : {}",
+                                url);
                         alreadyprocessed++;
                         continue;
                     }
 
                     Metadata metadata = fromKeyValues(keyValues);
                     buffer.add(new Values(url, metadata));
+                    in_buffer.add(url);
+                    LOG.debug("{} -> added to buffer : {}", url);
                 }
 
                 if (hitsForThisBucket > 0)
@@ -333,7 +338,7 @@ public class AggregationSpout extends AbstractSpout implements
         }
 
         // remove lock
-        isInQuery.set(false);
+        markQueryReceivedNow();
     }
 
 }
